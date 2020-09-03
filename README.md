@@ -4,7 +4,11 @@
 
 1. Create a virtual environment and activate it [optional]
 
-2. You can install ATLAS or Intel MKL to work with SPAMS. The [documentation](http://spams-devel.gforge.inria.fr/doc-python/html/doc_spams003.html)
+2. Install the requirements
+
+	`pip install -r requirements.txt`
+
+3. You can install ATLAS or Intel MKL to work with SPAMS. The [documentation](http://spams-devel.gforge.inria.fr/doc-python/html/doc_spams003.html)
    suggests using MKL to get the best performance.
 
 	1. Atlas:
@@ -41,17 +45,17 @@
 			`pip install spams-mkl`
 
 
-3. Install the requirements
-
-	`pip install -r requirements.txt`
-
-
 ## Development
 
 1. For some unknown reason numpy must be imported always before spams to avoid
    the importation error `_spams_wrap.cpython-36m-x86_64-linux-gnu.so: undefined symbol: slasrt_`
 
-   ```
+   ``` python
    import numpy as np
    import spams
    ```
+2. Install all your dependencies before running `source /opt/intel/parallel_studio_xe_2020/psxevars.sh`. Otherwise, you could overwrite some Intel programs and cause error like `ImportError: /home/giussepi/.local/lib/python3.7/site-packages/_spams_wrap.cpython-37m-x86_64-linux-gnu.so: undefined symbol: slasrt_`. If this happens to you, you have a good chance of fixing it by unsintalling all your dependencies by running:
+
+	``` bash
+	pip uninstall -r requirements.
+	```
