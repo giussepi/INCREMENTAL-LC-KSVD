@@ -139,3 +139,9 @@ cython_debug/
 
 # emacs
 *~
+
+# generated data
+tmp
+
+# dataset
+trainingdata
