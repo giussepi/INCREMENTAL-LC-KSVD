@@ -10,9 +10,13 @@ from matplotlib import pyplot as plt
 from spams import trainDL, lasso, omp
 from scipy.io import loadmat
 
-from utils.utils import normcols
+generated_data_directory = "tmp"
+training_data_directory = "trainingdata"
 
-file_path = 'trainingdata/spatialpyramidfeatures4caltech101/spatialpyramidfeatures4caltech101.mat'
+file_path = os.path.join(
+    training_data_directory,
+    'spatialpyramidfeatures4caltech101/spatialpyramidfeatures4caltech101.mat'
+)
 data = loadmat(file_path)
 # data['filenameMat'].shape (1, 102)
 # data['featureMat'].shape (3000, 9144)
@@ -24,6 +28,7 @@ personnumber = 102  # person number for evaluation
 
 
 ntrainsamples = 30
+
 pars = dict(
     gamma=1e-6,
     lambda_=0.5,
@@ -270,8 +275,7 @@ def onlineDictionaryLearning(pars, trainingdata, HMat, QMat):
             'D': learned dictionary
             'A': learned transform matrix
             'W': learned classifier
-        stat:
-            'fobj_avg': average objective function value
+        fobj_avg: average objective function value
 
     Author: Zhuolin Jiang (zhuolin@umiacs.umd.edu)
     """
@@ -299,23 +303,16 @@ def onlineDictionaryLearning(pars, trainingdata, HMat, QMat):
     }
 
     # crf iterations
-    # TODO: remove fobj_total, it's never used
-    stat = dict(
-        fobj_total=0,
-        fobj_avg=dict()
-    )
+    fobj_avg = dict()
 
-    folder = 'tmp'
-    if not os.path.isdir(folder):
-        os.mkdir(folder)
+    if not os.path.isdir(generated_data_directory):
+        os.mkdir(generated_data_directory)
 
     for iter_ in range(num_iters):
         tic = time.time()
-        stat['fobj_total'] = 0
-
         # Take a random permutation of the samples
         filename = 'permute_{}_{}_{}.npy'.format(iter_, num_bases, pars['dataset'])
-        full_path = os.path.join(folder, filename)
+        full_path = os.path.join(generated_data_directory, filename)
 
         if os.path.isfile(full_path):
             ind_rnd = np.load(full_path, allow_pickle=False, fix_imports=False)
@@ -402,33 +399,31 @@ def onlineDictionaryLearning(pars, trainingdata, HMat, QMat):
         fobj = getobjective_lc(D, S, trainingdata, W, HMat, A, QMat, lambda_, mu)[0]
         # *** numpy.linalg.LinAlgError: Last 2 dimensions of the array must be square
         # stat['fobj_avg'][iter_] = fobj + 0.5*nu1*np.sum(W**2) + 0.5*nu2*np.sum(A**2)
-        stat['fobj_avg'][iter_] = fobj + 0.5*nu1*np.sum(np.multiply(W, W)) + 0.5*nu2*np.sum(A**2)
+        fobj_avg[iter_] = fobj + 0.5*nu1*np.sum(np.multiply(W, W)) + 0.5*nu2*np.sum(A**2)
         # filename = 'model_{}_{}_{}.npy'.format(iter_, num_bases, pars['dataset'])
-        # full_path = os.path.join(folder, filename)
+        # full_path = os.path.join(generated_data_directory, filename)
         # ValueError: Object arrays cannot be saved when allow_pickle=False
         # the model is being saved in three different files to avoid
         # setting allow_pickle=True when trying to save the whole model
         # np.save(full_path, model, allow_pickle=True, fix_imports=False)
         for key, value in model.items():
             filename = '{}_{}_{}_{}.npy'.format(key, iter_, num_bases, pars['dataset'])
-            full_path = os.path.join(folder, filename)
+            full_path = os.path.join(generated_data_directory, filename)
             np.save(full_path, value, allow_pickle=False, fix_imports=False)
-
-        stat_filename = 'stat_{}_{}_{}.npy'.format(iter_, num_bases, pars['dataset'])
-        stat_full_path = os.path.join(folder, stat_filename)
-        # saving as JSON to avoid using pickle
-        with open(stat_full_path, 'w') as file_:
-            json.dump(stat, file_)
 
         toc = time.time()
         print('Iter = {}, Elapsed Time = {}\n'.format(iter_, toc-tic))
 
-    return model, stat
+    stat_filename = 'stat_{}_{}.json'.format(num_bases, pars['dataset'])
+    stat_full_path = os.path.join(generated_data_directory, stat_filename)
+    # saving as JSON to avoid using pickle
+    with open(stat_full_path, 'w') as file_:
+        json.dump(fobj_avg, file_)
 
-# hereee
+    return model, fobj_avg
 
 
-def load_model_and_stat(iteration, num_bases, dataset):
+def load_model(iteration, num_bases, dataset):
     """
     Loads the matrices for the especified iteration, num_bases and dataset and returns it.
 
@@ -439,7 +434,6 @@ def load_model_and_stat(iteration, num_bases, dataset):
 
     Returns:
         dict(D=np.ndarray, W=np.ndarray, A=np.dnarray)
-
     """
     assert isinstance(iteration, int)
     assert isinstance(num_bases, int)
@@ -451,28 +445,44 @@ def load_model_and_stat(iteration, num_bases, dataset):
         'W',  # classifier
         'A',  # transform matrix
     ]
-    folder = 'tmp'
 
     for matrix in matrices:
         filename = '{}_{}_{}_{}.npy'.format(matrix, iteration, num_bases, dataset)
-        full_path = os.path.join(folder, filename)
+        full_path = os.path.join(generated_data_directory, filename)
 
         if os.path.isfile(full_path):
             model[matrix] = np.load(full_path, allow_pickle=False, fix_imports=False)
 
-    stat_filename = 'stat_{}_{}_{}.npy'.format(iteration, num_bases, dataset)
-    stat_full_path = os.path.join(folder, stat_filename)
+    return model
+
+
+def load_stats(num_bases, dataset):
+    """
+    Loads the stats generated during training with num_bases and dataset
+    Args:
+        iteration  (int): iteration when the matrix was saved
+        numb_bases (int): num_bases used
+
+    Returns
+        dict(iter0=fobj_avg, iter1=fobj_avg, ...)
+    """
+    assert isinstance(num_bases, int)
+    assert isinstance(dataset, str)
+
+    stat_filename = 'stat_{}_{}.json'.format(num_bases, dataset)
+    stat_full_path = os.path.join(generated_data_directory, stat_filename)
 
     with open(stat_full_path, 'r') as file_:
-        stat = json.load(file_)
+        fobj_avg = json.load(file_)
 
-    stat['fobj_avg'] = {int(k): v for k, v in stat['fobj_avg'].items()}
+    fobj_avg = {int(k): v for k, v in fobj_avg.items()}
 
-    return model, stat
+    return fobj_avg
+
 
 # uncomment
 # tic = time.time()
-# model, stat = onlineDictionaryLearning(pars, trainingsubset, H_train_subset, Q_train)
+# model, fobj_avg = onlineDictionaryLearning(pars, trainingsubset, H_train_subset, Q_train)
 # toc = time.time()
 # print('done! it took {} seconds'.format(toc-tic))
 # # done! it took 1577.4330954551697 seconds
@@ -507,18 +517,13 @@ def classification(D, W, data, Hlabel, sparsity):
     assert isinstance(sparsity, int)
 
     # sparse coding
-    G = D.T@D
-    # TODO: review that the parametes follows the requirements from the spams implementation
     # http://spams-devel.gforge.inria.fr/doc-python/html/doc_spams005.html#sec12
-    # ImportError: /home/giussepi/.local/lib/python3.7/site-packages/_spams_wrap.cpython-37m-x86_64-linux-gnu.so: undefined symbol: slasrt_
-    Gamma = omp(np.asfortranarray(D.T@data), np.asfortranarray(normcols(G)), sparsity)
+    Gamma = omp(data, D if np.isfortran(D) else np.asfortranarray(D), sparsity)
 
     # classify process
     errnum = 0
     err = np.empty((0, 4))
-    # maybe I should set the dtype to np.int
-    # TODO: double check that all the predictions are integers
-    prediction = np.empty((1, 0))
+    prediction = np.empty((1, 0), dtype=np.int)
 
     for featureid in range(data.shape[1]):
         spcode = Gamma[:, featureid]
@@ -538,36 +543,46 @@ def classification(D, W, data, Hlabel, sparsity):
 
 
 accuracy_list = []
+fobj_avg = load_stats(pars['numBases'], pars['dataset'])
 
 for ii in range(pars['maxIters']):
-    model, stat = load_model_and_stat(ii, pars['numBases'], pars['dataset'])
+    model = load_model(ii, pars['numBases'], pars['dataset'])
     D1 = model['D']
     W1 = model['W']
-    # classification
 
+    # classification
     accuracy_list.append(classification(D1, W1, testingsubset, H_test_subset, sparsitythres)[1])
     print('\nFinal recognition rate for OnlineDL is : {} , objective function value: {}'.format(
-        accuracy_list[ii], stat['fobj_avg'][ii]))
+        accuracy_list[ii], fobj_avg[ii]))
 
     if not bool(ii % 10):
         print('\n')
 
 accuracy_list = np.asarray(accuracy_list)
+
 print('Best recognition rate for OnlineDL is {} at iteration {}\n'.format(
     accuracy_list.max(), accuracy_list.argmax()))
 
 
 # plot the objective function values for all iterations
-plt.clf()
-plt.plot(list(stat['fobj_avg'].keys()), list(stat['fobj_avg'].values()), 'mo--', linewidth=2)
-plt.xlabel('Iterations')
-plt.ylabel('Average objective function value')
-plt.xticks(list(range(0, 20)), list(range(1, 21)))
-plt.show()
+# plt.clf()
+# plt.plot(list(fobj_avg.keys()), list(fobj_avg.values()), 'mo--', linewidth=2)
+# plt.xlabel('Iterations')
+# plt.ylabel('Average objective function value')
+# plt.xticks(list(range(0, 20)), list(range(1, 21)))
+# plt.show()
 
-plt.clf()
-plt.plot(accuracy_list, 'rs--', linewidth=2)
-plt.xticks(list(range(0, 20)), list(range(1, 21)))
-plt.xlabel('Iterations')
-plt.ylabel('Accuracy')
-plt.show()
+# plt.clf()
+# plt.plot(accuracy_list, 'rs--', linewidth=2)
+# plt.xticks(list(range(0, 20)), list(range(1, 21)))
+# plt.xlabel('Iterations')
+# plt.ylabel('Accuracy')
+# plt.show()
+# Best recognition rate for OnlineDL is 0.710552268244576 at iteration 3
+# Best recognition rate for OnlineDL is 0.7140039447731755 at iteration 0
+# the paper report for LC-KSVD1 and LC-KSVD2 73.4 and 73.6 respectively for 30 samples
+# per class
+# all the evaluations were done using spatial pyramid features
+# They used 510, 1,020, 1,530, 2,040, 2,550, and 3,060
+# dictionary items/sizes, respectively, for 5, 10, 15, 20, 25, and
+# 30 training samples per category.
