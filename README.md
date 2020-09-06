@@ -1,4 +1,4 @@
-# INCREMENTAL-LC-KSVD
+# INCREMENTAL LC-KSVD
 
 Python implementation of the Incremental Label consistent KSVD algorithm proposed by Zhuolin Jiang, Zhe Lin and Larry S. Davis.
 
