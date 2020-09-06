@@ -76,18 +76,18 @@ Requires downloading the [caltech101 extracted spatial pyramid features](http://
 and placing it in the TRAINING_DATA_DIRECTORY or create a symbolic link to its location. e.g.:
 
 ``` bash
-	cd ~/Downloads
-	unzip spatialpyramidfeatures4caltech101.zip
-	cd <path_to_my_project>
-	mkdir trainingdata
-	cd trainingdata
-	ln -s spatialpyramidfeatures4caltech101 /home/<myuser>/Downloads/spatialpyramidfeatures4caltech101
+cd ~/Downloads
+unzip spatialpyramidfeatures4caltech101.zip
+cd <path_to_my_project>
+mkdir trainingdata
+cd trainingdata
+ln -s spatialpyramidfeatures4caltech101 /home/<myuser>/Downloads/spatialpyramidfeatures4caltech101
 ```
 
 Usage
 
 ``` python
-	from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
 
-	train_feats, train_labels, test_feats, test_labels = DBhandler()()
+train_feats, train_labels, test_feats, test_labels = DBhandler()()
 ```
