@@ -1,5 +1,10 @@
 # INCREMENTAL-LC-KSVD
 
+Python implementation of the Incremental Label consistent KSVD algorithm proposed by Zhuolin Jiang, Zhe Lin and Larry S. Davis.
+
+This implementation is a translation of the matlab code released by the authors
+on [http://users.umiacs.umd.edu/~zhuolin/projectlcksvd.html](http://users.umiacs.umd.edu/~zhuolin/projectlcksvd.html).
+
 ## INSTALLATION
 
 1. Create a virtual environment and activate it [optional]
@@ -58,4 +63,33 @@
 
 	``` bash
 	pip uninstall -r requirements.txt
+	```
+3. All the code must be called from the `main.py` file.
+
+## Dataset handlers
+	Classes implemented to manage datasets and provide the training and testing
+    data.
+
+### spatialpyramidfeatures4caltech101
+
+	Requires downloading the [caltech101 extracted spatial pyramid
+    features](http://www.umiacs.umd.edu/~zhuolin/LCKSVD/features/spatialpyramidfeatures4caltech101.zip)
+	and placing it in the TRAINING_DATA_DIRECTORY or create a symbolic link to
+	its location. e.g.:
+
+	``` bash
+	cd ~/Downloads
+	unzip spatialpyramidfeatures4caltech101.zip
+	cd <path_to_my_project>
+	mkdir trainingdata
+	cd trainingdata
+	ln -s spatialpyramidfeatures4caltech101 /home/<myuser>/Downloads/spatialpyramidfeatures4caltech101
+	```
+
+	Usage
+
+	``` python
+	from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+
+	train_feats, train_labels, test_feats, test_labels = DBhandler()()
 	```

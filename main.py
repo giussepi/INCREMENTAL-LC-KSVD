@@ -8,127 +8,10 @@ import time
 import numpy as np
 from matplotlib import pyplot as plt
 from spams import trainDL, lasso, omp
-from scipy.io import loadmat
 
-generated_data_directory = "tmp"
-training_data_directory = "trainingdata"
+import settings
+from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
 
-file_path = os.path.join(
-    training_data_directory,
-    'spatialpyramidfeatures4caltech101/spatialpyramidfeatures4caltech101.mat'
-)
-data = loadmat(file_path)
-# data['filenameMat'].shape (1, 102)
-# data['featureMat'].shape (3000, 9144)
-# data['labelMat'].shape (102, 9144)
-
-# constant
-personnumber = 102  # person number for evaluation
-# constant for incremental dictionary learning
-
-
-ntrainsamples = 30
-
-pars = dict(
-    gamma=1e-6,
-    lambda_=0.5,
-    mu=0.6,  # ||Q-AX||^2
-    nu1=1e-6,  # regularization of A
-    nu2=1e-6,  # regularization of W
-    rho=10,  # initial learning rate
-    maxIters=20,  # iteration number for incremental learning
-    batchSize=60,
-    iterationini=5,  # iteration number for initialization
-    ntrainsamples=ntrainsamples,
-    numBases=personnumber*ntrainsamples,  # dictionary size
-    dataset='caltech101',
-)
-
-# constant for LC-KSVD2
-sparsitythres = 40  # sparsity prior
-sqrt_alpha = 0.0012  # weights for label constraint term
-sqrt_beta = 0.0012  # weights for classification err term
-iterations = 50  # iteration number
-iterations4ini = 20  # iteration number for initialization
-dictsize = personnumber*30  # dictionary size
-
-
-def obtaintraingtestingsamples(featureMatrix, labelMatrix, numPerClass):
-    """
-    Obtain training and testing features by random sampling
-
-    Args:
-        featureMatrix      - input features
-        labelMatrix        - label matrix for input features
-        numPerClass        - number of training samples from each category
-
-    Return:
-        testPart           - testing features
-        HtestPart          - label matrix for testing features
-        trainPart          - training features
-        HtrainPart         - label matrix for training features
-    """
-    numClass = labelMatrix.shape[0]  # number of objects
-    testPart = np.empty((featureMatrix.shape[0], 0))
-    HtestPart = np.empty((labelMatrix.shape[0], 0))
-    trainPart = np.empty((featureMatrix.shape[0], 0))
-    HtrainPart = np.empty((labelMatrix.shape[0], 0))
-
-    for classid in range(numClass):
-        # col_ids = find(labelMatrix(classid, : ) == 1)
-        col_ids = np.array(np.nonzero(labelMatrix[classid, :] == 1)).ravel()
-
-        # data_ids = find(colnorms_squared_new(featureMatrix(: , col_ids)) > 1e-6)
-        data_ids = np.array(np.nonzero(np.sum(featureMatrix[:, col_ids]**2, axis=0) > 1e-6)).ravel()
-        # % ensure no zero data elements
-        # perm = randperm(length(data_ids))
-        # perm = np.random.permutation(data_ids.shape[0])
-        # # perm = [1:length(data_ids)];
-
-        # trainids = col_ids(data_ids(perm(1: numPerClass)))
-        # trainids = col_ids[data_ids[perm[:numPerClass]]]
-        trainids = col_ids[np.random.choice(data_ids, numPerClass, replace=False)]
-        # testids = setdiff(col_ids, trainids)
-        testids = np.setdiff1d(col_ids, trainids)
-
-        # testPart = [testPart featureMatrix(:, testids)]
-        testPart = np.c_[testPart, featureMatrix[:, testids]]
-        # HtestPart = [HtestPart labelMatrix(:, testids)]
-        HtestPart = np.c_[HtestPart, labelMatrix[:, testids]]
-        # trainPart = [trainPart featureMatrix(:, trainids)]
-        trainPart = np.c_[trainPart, featureMatrix[:, trainids]]
-        # HtrainPart = [HtrainPart labelMatrix(:, trainids)]
-        HtrainPart = np.c_[HtrainPart, labelMatrix[:, trainids]]
-
-    return testPart, HtestPart, trainPart, HtrainPart
-
-
-# get training and testing data
-testing_feats, H_test, training_feats, H_train = obtaintraingtestingsamples(
-    data['featureMat'], data['labelMat'], pars['ntrainsamples'])
-# testing_feats (3000, 6084)
-# H_test (102, 6084)
-# training_feats (3000, 3060)
-# H_train (102, 3060)
-
-# get the subsets of training data and testing data
-# it is related to the variable 'personnumber'
-# [labelvector_train,~] = find(H_train);
-labelvector_train, _ = H_train.nonzero()  # 3060
-# [labelvector_test, ~] = find(H_test)
-labelvector_test, _ = H_test.nonzero()  # 6084
-# trainsampleid = find(labelvector_train <= personnumber)
-trainsampleid = np.nonzero(labelvector_train <= personnumber)[0]  # 3060
-# testsampleid = find(labelvector_test <= personnumber)
-testsampleid = np.nonzero(labelvector_test <= personnumber)[0]  # 6084
-# trainingsubset = training_feats(:, trainsampleid)
-trainingsubset = training_feats[:, trainsampleid]  # 3000, 3060
-# testingsubset = testing_feats(:, testsampleid)
-testingsubset = testing_feats[:, testsampleid]  # 3000, 6084
-# H_train_subset = H_train(1: personnumber, trainsampleid)
-H_train_subset = H_train[: personnumber+1, trainsampleid]  # 102, 3060
-# H_test_subset = H_test(1:personnumber,testsampleid);
-H_test_subset = H_test[: personnumber+1, testsampleid]  # 102, 6084
 
 ###############################################################################
 #                     Verified with matlabscript till here                    #
@@ -136,6 +19,17 @@ H_test_subset = H_test[: personnumber+1, testsampleid]  # 102, 6084
 
 ##########
 # Incremental Dictionary learning
+
+trainingsubset, H_train_subset, testingsubset, H_test_subset = DBhandler()()
+
+# np.save(os.path.join(settings.GENERATED_DATA_DIRECTORY, 'trainingsubset.npy'),
+#         trainingsubset, allow_pickle=False, fix_imports=False)
+# np.save(os.path.join(settings.GENERATED_DATA_DIRECTORY, 'H_train_subset.npy'),
+#         H_train_subset, allow_pickle=False, fix_imports=False)
+# np.save(os.path.join(settings.GENERATED_DATA_DIRECTORY, 'testingsubset.npy'),
+#         testingsubset, allow_pickle=False, fix_imports=False)
+# np.save(os.path.join(settings.GENERATED_DATA_DIRECTORY, 'H_test_subset.npy'),
+#         H_test_subset, allow_pickle=False, fix_imports=False)
 
 
 def paramterinitialization(training_feats, H_train, para):
@@ -169,18 +63,14 @@ def paramterinitialization(training_feats, H_train, para):
         col_ids = np.array(np.nonzero(H_train[classid, :] == 1)).ravel()
         # ensure no zero data elements are chosen
         data_ids = np.array(np.nonzero(np.sum(training_feats[:, col_ids]**2, axis=0) > 1e-6)).ravel()
-        # perm = randperm(length(data_ids));
-        # perm = [1:length(data_ids)];
 
         # Initilization for LC-KSVD (perform KSVD in each class)
-        # Dpart = training_feats(: , col_ids(data_ids(perm(1: numPerClass))))
         Dpart = training_feats[:, col_ids[np.random.choice(data_ids, numPerClass, replace=False)]]
         param1['D'] = Dpart  # initial dictionary
         Dpart = trainDL(training_feats[:, col_ids[data_ids]], **param1)
         Dinit = np.c_[Dinit, Dpart]
         labelvector = np.zeros((numClass, 1))  # eyes
         labelvector[classid] = 1
-        # dictLabel = [dictLabel repmat(labelvector,1,numPerClass)];
         dictLabel = np.c_[dictLabel, np.tile(labelvector, (1, numPerClass))]
 
     param1['D'] = np.asfortranarray(Dinit)  # initial dictionary
@@ -217,16 +107,8 @@ def paramterinitialization(training_feats, H_train, para):
 
 # initialization
 # uncomment
-# [Dinit, Winit, Tinit, Q_train] = paramterinitialization(trainingsubset, H_train_subset, pars)
+# [Dinit, Winit, Tinit, Q_train] = paramterinitialization(trainingsubset, H_train_subset, settings.PARS)
 
-###############################################################################
-#                          working good                                       #
-###############################################################################
-
-# uncomment
-# pars['D'] = Dinit
-# pars['A'] = Tinit
-# pars['W'] = Winit
 
 print('\nIncremental dictionary learning...')
 
@@ -253,22 +135,22 @@ def getobjective_lc(D, S, Y, W, H, A, Q, lambda_, mu):
     return fobj, fresidue1, fresidue2, fresidue3, freg
 
 
-def onlineDictionaryLearning(pars, trainingdata, HMat, QMat):
+def onlineDictionaryLearning(dinit, tinit, winit, pars, trainingdata, HMat, QMat):
     """
     online dictionary learning using stochastic gradient descent algorithm
     Args:
-        pars: learning paramters
-           'D': initial dictionary
-           'A': initial transform matrix
-           'W': initial classifier
+        dinit (np.ndarray): initial dictionary
+        tinit (np.ndarray): initial transform matrix
+        winit (np.ndarray): initial classifier
+        pars        (dict): learning paramters
            'mu': reguliarization parameter
            'nu1': reguliarization parameter
            'nu2': reguliarization parameter
            'maxIters': iteration number
            'rho': learning rate parameter
-        trainingdata: input training des. with size of n X N
-        HMat: label matrix of training des. with size of m X N
-        QMat: optimal code matrix of training des. with size of K X N
+        trainingdata (np.ndarray): input training des. with size of n X N
+        HMat         (np.ndarray): label matrix of training des. with size of m X N
+        QMat         (np.ndarray): optimal code matrix of training des. with size of K X N
 
     Returns:
         model: learned paramters
@@ -291,9 +173,9 @@ def onlineDictionaryLearning(pars, trainingdata, HMat, QMat):
     # n0 = num_images/10
     n0 = num_images/(pars['batchSize']*10)
     model = dict(
-        D=pars['D'],  # dictionary
-        W=pars['W'],  # classifier
-        A=pars['A'],  # transform matrix
+        D=dinit,  # dictionary
+        A=tinit,  # transform matrix
+        W=winit,  # classifier
     )
 
     param = {
@@ -305,14 +187,14 @@ def onlineDictionaryLearning(pars, trainingdata, HMat, QMat):
     # crf iterations
     fobj_avg = dict()
 
-    if not os.path.isdir(generated_data_directory):
-        os.mkdir(generated_data_directory)
+    if not os.path.isdir(settings.GENERATED_DATA_DIRECTORY):
+        os.mkdir(settings.GENERATED_DATA_DIRECTORY)
 
     for iter_ in range(num_iters):
         tic = time.time()
         # Take a random permutation of the samples
         filename = 'permute_{}_{}_{}.npy'.format(iter_, num_bases, pars['dataset'])
-        full_path = os.path.join(generated_data_directory, filename)
+        full_path = os.path.join(settings.GENERATED_DATA_DIRECTORY, filename)
 
         if os.path.isfile(full_path):
             ind_rnd = np.load(full_path, allow_pickle=False, fix_imports=False)
@@ -408,14 +290,14 @@ def onlineDictionaryLearning(pars, trainingdata, HMat, QMat):
         # np.save(full_path, model, allow_pickle=True, fix_imports=False)
         for key, value in model.items():
             filename = '{}_{}_{}_{}.npy'.format(key, iter_, num_bases, pars['dataset'])
-            full_path = os.path.join(generated_data_directory, filename)
+            full_path = os.path.join(settings.GENERATED_DATA_DIRECTORY, filename)
             np.save(full_path, value, allow_pickle=False, fix_imports=False)
 
         toc = time.time()
         print('Iter = {}, Elapsed Time = {}\n'.format(iter_, toc-tic))
 
     stat_filename = 'stat_{}_{}.json'.format(num_bases, pars['dataset'])
-    stat_full_path = os.path.join(generated_data_directory, stat_filename)
+    stat_full_path = os.path.join(settings.GENERATED_DATA_DIRECTORY, stat_filename)
     # saving as JSON to avoid using pickle
     with open(stat_full_path, 'w') as file_:
         json.dump(fobj_avg, file_)
@@ -442,13 +324,13 @@ def load_model(iteration, num_bases, dataset):
     model = dict()
     matrices = [
         'D',  # dictionary
-        'W',  # classifier
         'A',  # transform matrix
+        'W',  # classifier
     ]
 
     for matrix in matrices:
         filename = '{}_{}_{}_{}.npy'.format(matrix, iteration, num_bases, dataset)
-        full_path = os.path.join(generated_data_directory, filename)
+        full_path = os.path.join(settings.GENERATED_DATA_DIRECTORY, filename)
 
         if os.path.isfile(full_path):
             model[matrix] = np.load(full_path, allow_pickle=False, fix_imports=False)
@@ -470,7 +352,7 @@ def load_stats(num_bases, dataset):
     assert isinstance(dataset, str)
 
     stat_filename = 'stat_{}_{}.json'.format(num_bases, dataset)
-    stat_full_path = os.path.join(generated_data_directory, stat_filename)
+    stat_full_path = os.path.join(settings.GENERATED_DATA_DIRECTORY, stat_filename)
 
     with open(stat_full_path, 'r') as file_:
         fobj_avg = json.load(file_)
@@ -482,10 +364,10 @@ def load_stats(num_bases, dataset):
 
 # uncomment
 # tic = time.time()
-# model, fobj_avg = onlineDictionaryLearning(pars, trainingsubset, H_train_subset, Q_train)
+# model, fobj_avg = onlineDictionaryLearning(Dinit, Tinit, Winit, settings.PARS, trainingsubset, H_train_subset, Q_train)
 # toc = time.time()
 # print('done! it took {} seconds'.format(toc-tic))
-# # done! it took 1577.4330954551697 seconds
+# done! it took 1577.4330954551697 seconds
 
 
 def classification(D, W, data, Hlabel, sparsity):
@@ -497,7 +379,6 @@ def classification(D, W, data, Hlabel, sparsity):
         W          (np.ndarray): learned classifier parameters
         data       (np.ndarray): testing features
         Hlabel     (np.ndarray): labels matrix for testing feature
-        iterations        (int): iterations for KSVD
         sparsity          (int): sparsity threshold
 
     Returns:
@@ -513,7 +394,6 @@ def classification(D, W, data, Hlabel, sparsity):
     assert isinstance(W, np.ndarray)
     assert isinstance(data, np.ndarray)
     assert isinstance(Hlabel, np.ndarray)
-    assert isinstance(iterations, int)
     assert isinstance(sparsity, int)
 
     # sparse coding
@@ -543,15 +423,15 @@ def classification(D, W, data, Hlabel, sparsity):
 
 
 accuracy_list = []
-fobj_avg = load_stats(pars['numBases'], pars['dataset'])
+fobj_avg = load_stats(settings.PARS['numBases'], settings.PARS['dataset'])
 
-for ii in range(pars['maxIters']):
-    model = load_model(ii, pars['numBases'], pars['dataset'])
+for ii in range(settings.PARS['maxIters']):
+    model = load_model(ii, settings.PARS['numBases'], settings.PARS['dataset'])
     D1 = model['D']
     W1 = model['W']
 
     # classification
-    accuracy_list.append(classification(D1, W1, testingsubset, H_test_subset, sparsitythres)[1])
+    accuracy_list.append(classification(D1, W1, testingsubset, H_test_subset, settings.SPARSITYTHRES)[1])
     print('\nFinal recognition rate for OnlineDL is : {} , objective function value: {}'.format(
         accuracy_list[ii], fobj_avg[ii]))
 
@@ -580,6 +460,9 @@ print('Best recognition rate for OnlineDL is {} at iteration {}\n'.format(
 # plt.show()
 # Best recognition rate for OnlineDL is 0.710552268244576 at iteration 3
 # Best recognition rate for OnlineDL is 0.7140039447731755 at iteration 0
+# Best recognition rate for OnlineDL is 0.7218934911242604 at iteration 1
+# Best recognition rate for OnlineDL is 0.7345496383957922 at iteration 1
+# Best recognition rate for OnlineDL is 0.7355358316896778 at iteration 1
 # the paper report for LC-KSVD1 and LC-KSVD2 73.4 and 73.6 respectively for 30 samples
 # per class
 # all the evaluations were done using spatial pyramid features
