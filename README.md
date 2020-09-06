@@ -67,29 +67,27 @@ on [http://users.umiacs.umd.edu/~zhuolin/projectlcksvd.html](http://users.umiacs
 3. All the code must be called from the `main.py` file.
 
 ## Dataset handlers
-	Classes implemented to manage datasets and provide the training and testing
-    data.
+
+Classes implemented to manage datasets and provide the training and testing data.
 
 ### spatialpyramidfeatures4caltech101
 
-	Requires downloading the [caltech101 extracted spatial pyramid
-    features](http://www.umiacs.umd.edu/~zhuolin/LCKSVD/features/spatialpyramidfeatures4caltech101.zip)
-	and placing it in the TRAINING_DATA_DIRECTORY or create a symbolic link to
-	its location. e.g.:
+Requires downloading the [caltech101 extracted spatial pyramid features](http://www.umiacs.umd.edu/~zhuolin/LCKSVD/features/spatialpyramidfeatures4caltech101.zip)
+and placing it in the TRAINING_DATA_DIRECTORY or create a symbolic link to its location. e.g.:
 
-	``` bash
+``` bash
 	cd ~/Downloads
 	unzip spatialpyramidfeatures4caltech101.zip
 	cd <path_to_my_project>
 	mkdir trainingdata
 	cd trainingdata
 	ln -s spatialpyramidfeatures4caltech101 /home/<myuser>/Downloads/spatialpyramidfeatures4caltech101
-	```
+```
 
-	Usage
+Usage
 
-	``` python
+``` python
 	from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
 
 	train_feats, train_labels, test_feats, test_labels = DBhandler()()
-	```
+```
