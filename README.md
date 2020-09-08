@@ -28,7 +28,7 @@ on [http://users.umiacs.umd.edu/~zhuolin/projectlcksvd.html](http://users.umiacs
 
 			`pip installs spams`
 
-	2. Intel Intel Math Kernel Library (MKL)
+	2. Intel Math Kernel Library (MKL)
 
 		1. MKL is part of the Intel® Parallel Studio XE Cluster Edition for
     Linux. So you need to register on [its web
