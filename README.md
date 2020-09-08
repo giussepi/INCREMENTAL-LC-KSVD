@@ -91,3 +91,14 @@ from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
 
 train_feats, train_labels, test_feats, test_labels = DBhandler()()
 ```
+
+## ILC-KSVD
+
+``` python
+from models.ilc_ksvd import ILCksvd
+from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+
+ilc_ksvd = ILCksvd(DBhandler)
+ilc_ksvd.train()
+ilc_ksvd.test(plot=True)
+```

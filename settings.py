@@ -14,7 +14,7 @@ FULL_DATASET_PATH = os.path.join(
     'spatialpyramidfeatures4caltech101/spatialpyramidfeatures4caltech101.mat'
 )
 
-PERSON_NUMBER = 102  # person number for evaluation
+CLASS_NUMBER = 102  # class number for evaluation. Person number for caltech101
 
 ###############################################################################
 #                       Incremental Dictionary Learning                       #
@@ -33,7 +33,7 @@ PARS = dict(
     batchSize=60,
     iterationini=5,  # iteration number for initialization
     ntrainsamples=N_TRAINSAMPLES,
-    numBases=PERSON_NUMBER*N_TRAINSAMPLES,  # dictionary size
+    numBases=CLASS_NUMBER*N_TRAINSAMPLES,  # dictionary size
     dataset='caltech101',
 )
 
@@ -46,4 +46,4 @@ SQRT_ALPHA = 0.0012  # weights for label constraint term # not used
 SQRT_BETA = 0.0012  # weights for classification err term # not used
 ITERATIONS = 50  # iteration number  # not used
 ITERATIONS4INI = 20  # iteration number for initialization # not used
-DICTSIZE = PERSON_NUMBER*N_TRAINSAMPLES  # dictionary size  # not used and repeated at pars['numBases']
+DICTSIZE = CLASS_NUMBER*N_TRAINSAMPLES  # dictionary size  # not used and repeated at pars['numBases']
