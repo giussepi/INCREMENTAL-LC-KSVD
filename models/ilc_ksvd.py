@@ -36,7 +36,7 @@ class ILCksvd:
         self.train_feats, self.train_labels, self.test_feats, self.test_labels = \
             db_handler_class()()
 
-    def paramter_initialization(self):
+    def parameter_initialization(self):
         """
         parameter initialization for incremental dictionary learning
 
@@ -293,7 +293,7 @@ class ILCksvd:
     def train(self):
         """ Gets the initialization parameters and trains the model """
         print("Paremeter initialization")
-        Dinit, Winit, Tinit, Q_train = self.paramter_initialization()
+        Dinit, Winit, Tinit, Q_train = self.parameter_initialization()
         print("Completed")
         print('Incremental dictionary learning...')
         tic = time.time()
