@@ -1,4 +1,9 @@
-# INCREMENTAL-LC-KSVD
+# INCREMENTAL LC-KSVD
+
+Python implementation of the Incremental Label consistent KSVD algorithm proposed by Zhuolin Jiang, Zhe Lin and Larry S. Davis.
+
+This implementation is a translation of the matlab code released by the authors
+on [http://users.umiacs.umd.edu/~zhuolin/projectlcksvd.html](http://users.umiacs.umd.edu/~zhuolin/projectlcksvd.html).
 
 ## INSTALLATION
 
@@ -23,7 +28,7 @@
 
 			`pip installs spams`
 
-	2. Intel Intel Math Kernel Library (MKL)
+	2. Intel Math Kernel Library (MKL)
 
 		1. MKL is part of the Intel® Parallel Studio XE Cluster Edition for
     Linux. So you need to register on [its web
@@ -59,3 +64,48 @@
 	``` bash
 	pip uninstall -r requirements.txt
 	```
+3. All the code must be called from the `main.py` file.
+
+## Dataset handlers
+
+Classes implemented to manage datasets and provide the training and testing data.
+
+### spatialpyramidfeatures4caltech101
+
+Requires downloading the [caltech101 extracted spatial pyramid features](http://www.umiacs.umd.edu/~zhuolin/LCKSVD/features/spatialpyramidfeatures4caltech101.zip)
+and placing it in the TRAINING_DATA_DIRECTORY or create a symbolic link to its location. e.g.:
+
+``` bash
+cd ~/Downloads
+unzip spatialpyramidfeatures4caltech101.zip
+cd <path_to_my_project>
+mkdir trainingdata
+cd trainingdata
+ln -s spatialpyramidfeatures4caltech101 /home/<myuser>/Downloads/spatialpyramidfeatures4caltech101
+```
+
+Usage
+
+``` python
+from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+
+train_feats, train_labels, test_feats, test_labels = DBhandler()()
+```
+
+## ILC-KSVD
+
+``` python
+from models.ilc_ksvd import ILCksvd
+from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+
+ilc_ksvd = ILCksvd(DBhandler)
+ilc_ksvd.train()
+ilc_ksvd.test(plot=True)
+```
+Achieving the same results reported in the original paper [Label Consistent
+K-SVD: Learning a Discriminative Dictionary for
+Recognition](https://ieeexplore.ieee.org/abstract/document/6516503) using
+spams + MKL required training the algorithm and then using another python execution
+to test it. We assume that this particular behaviour is related with spams and
+MKL; because the results, after running the algorithm several times during the
+day, are not as good as those obtained after restarting the computer.
