@@ -102,3 +102,10 @@ ilc_ksvd = ILCksvd(DBhandler)
 ilc_ksvd.train()
 ilc_ksvd.test(plot=True)
 ```
+Achieving the same results reported in the original paper [Label Consistent
+K-SVD: Learning a Discriminative Dictionary for
+Recognition](https://ieeexplore.ieee.org/abstract/document/6516503) using
+spams + MKL required training the algorithm and then using another python execution
+to test it. We assume that this particular behaviour is related with spams and
+MKL; because the results, after running the algorithm several times during the
+day, are not as good as those obtained after restarting the computer.
