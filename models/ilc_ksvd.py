@@ -64,11 +64,6 @@ class ILCksvd:
             'mode': 2
         }
 
-        # for classid in range(numClass):
-        #     labelvector = np.zeros((numClass, 1), dtype=np.int)
-        #     labelvector[classid] = 1
-        #     dictLabel = np.c_[dictLabel, np.tile(labelvector, (1, numPerClass))]
-
         for classid in range(numClass):
             col_ids = np.array(np.nonzero(self.train_labels[classid, :] == 1)).ravel()
             # ensure no zero data elements are chosen
