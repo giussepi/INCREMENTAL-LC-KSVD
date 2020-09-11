@@ -5,6 +5,19 @@ Python implementation of the Incremental Label consistent KSVD algorithm propose
 This implementation is a translation of the matlab code released by the authors
 on [http://users.umiacs.umd.edu/~zhuolin/projectlcksvd.html](http://users.umiacs.umd.edu/~zhuolin/projectlcksvd.html).
 
+Thee results on Caltech101 using 30 training samples are consistent with those reported by the [authors](http://users.umiacs.umd.edu/~zhuolin/projectlcksvd.html)
+
+| Best recognition rate (accuracy) | Iteration |
+|:-----------------------:|:-----------:|
+|     0.710552268244576 |         3 |
+|    0.7140039447731755 |         0 |
+|    0.7284681130834977 |         1 |
+|    0.7218934911242604 |         1 |
+|    0.7345496383957922 |         1 |
+|     0.735207100591716 |         0 |
+|    0.7355358316896778 |         1 |
+|    0.7373438527284681 |         0 |
+
 ## INSTALLATION
 
 1. Create a virtual environment and activate it [optional]
