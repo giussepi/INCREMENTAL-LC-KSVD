@@ -94,7 +94,7 @@ unzip spatialpyramidfeatures4caltech101.zip
 cd <path_to_my_project>
 mkdir trainingdata
 cd trainingdata
-ln -s spatialpyramidfeatures4caltech101 /home/<myuser>/Downloads/spatialpyramidfeatures4caltech101
+ln -s /home/<myuser>/Downloads/spatialpyramidfeatures4caltech101 spatialpyramidfeatures4caltech101
 ```
 
 Usage

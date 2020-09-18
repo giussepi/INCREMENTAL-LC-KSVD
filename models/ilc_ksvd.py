@@ -80,8 +80,8 @@ class ILCksvd:
 
         param1['D'] = np.asfortranarray(Dinit)  # initial dictionary
         # RuntimeError: matrix arg 10 must be a 2d double Fortran Array
+        self.train_feats = self.train_feats if np.isfortran(self.train_feats) else np.asfortranarray(self.train_feats)
         Dinit = trainDL(self.train_feats, **param1)
-
         Xinit = lasso(self.train_feats, Dinit, **param2)
 
         # learning linear classifier parameters
@@ -115,7 +115,9 @@ class ILCksvd:
         E3 = W.astype(np.float64)@S - H.astype(np.float64)
 
         fresidue1 = np.sum(E1**2)  # reconstruction error
-        fresidue2 = np.sum(E2**2)  # optimal sparse code error
+        # numpy.linalg.LinAlgError: Last 2 dimensions of the array must be square
+        # fresidue2 = np.sum(E2**2)  # optimal sparse code error
+        fresidue2 = np.sum(np.multiply(E2, E2))
         # TODO: Review why this happens, I believe it's an issue related with W.
         # maybe it's calculated in a lazy way I'm not sure.....
         # numpy.linalg.LinAlgError: Last 2 dimensions of the array must be square
@@ -320,7 +322,7 @@ class ILCksvd:
         # sparse coding
         # http://spams-devel.gforge.inria.fr/doc-python/html/doc_spams005.html#sec12
         Gamma = omp(
-            self.test_feats,
+            self.test_feats if np.isfortran(self.test_feats) else np.asfortranarray(self.test_feats),
             D if np.isfortran(D) else np.asfortranarray(D), settings.SPARSITYTHRES
         )
 
@@ -413,10 +415,12 @@ class ILCksvd:
             W1 = model['W']
 
             # classification
+            tic = time.time()
             accuracy_list.append(self.classification(D1, W1)[1])
+            toc = time.time()
             print(
-                'Final recognition rate for OnlineDL is : {} , objective function value: {}'
-                .format(accuracy_list[ii], fobj_avg[ii])
+                'Final recognition rate for OnlineDL is : {} , objective function value: {}, time: {}'
+                .format(accuracy_list[ii], fobj_avg[ii], toc-tic)
             )
 
         accuracy_list = np.asarray(accuracy_list)

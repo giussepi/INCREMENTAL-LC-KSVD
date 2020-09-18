@@ -2,7 +2,8 @@
 """ main """
 
 from models.ilc_ksvd import ILCksvd
-from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+# from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+from utils.datasets.patchcamelyon import DBhandler
 
 
 def main():
