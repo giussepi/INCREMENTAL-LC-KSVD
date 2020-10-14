@@ -22,11 +22,17 @@ The results on Caltech101 using 30 training samples are consistent with those re
 
 1. Create a virtual environment and activate it [optional]
 
-2. Install the requirements
+2. Create your local settings.py
+
+	``` bash
+	cp settings.py.template settings.py
+	```
+
+3. Install the requirements
 
 	`pip install -r requirements.txt`
 
-3. You can install ATLAS or Intel MKL to work with SPAMS. The [documentation](http://spams-devel.gforge.inria.fr/doc-python/html/doc_spams003.html)
+4. You can install ATLAS or Intel MKL to work with SPAMS. The [documentation](http://spams-devel.gforge.inria.fr/doc-python/html/doc_spams003.html)
    suggests using MKL to get the best performance.
 
 	1. Atlas:
@@ -85,31 +91,86 @@ Classes implemented to manage datasets and provide the training and testing data
 
 ### spatialpyramidfeatures4caltech101
 
-Requires downloading the [caltech101 extracted spatial pyramid features](http://www.umiacs.umd.edu/~zhuolin/LCKSVD/features/spatialpyramidfeatures4caltech101.zip)
-and placing it in the TRAINING_DATA_DIRECTORY or create a symbolic link to its location. e.g.:
+1. Download the [caltech101 extracted spatial pyramid features](http://www.umiacs.umd.edu/~zhuolin/LCKSVD/features/spatialpyramidfeatures4caltech101.zip) and placing it in the TRAINING_DATA_DIRECTORY or create a symbolic link to its location. e.g.:
 
-``` bash
-cd ~/Downloads
-unzip spatialpyramidfeatures4caltech101.zip
-cd <path_to_my_project>
-mkdir trainingdata
-cd trainingdata
-ln -s spatialpyramidfeatures4caltech101 /home/<myuser>/Downloads/spatialpyramidfeatures4caltech101
-```
+	``` bash
+	cd ~/Downloads
+	unzip spatialpyramidfeatures4caltech101.zip
+	cd <path_to_my_project>
+	mkdir trainingdata
+	cd trainingdata
+	ln -s /home/<myuser>/Downloads/spatialpyramidfeatures4caltech101 spatialpyramidfeatures4caltech101
+	```
 
-Usage
+2. Fill the spatialpyramidfeatures4caltech101 section from your `settings.py`
+
+3. Update the values of `CLASS_NUMBER` and `DATASET_NAME` in your `settings.py`
+
+	``` python
+	CLASS_NUMBER = 102
+	DATASET_NAME = 'caltech101'
+	```
+
+4. Call the handler. If it works then you are ready to use ILC-KSVD.
+   ``` python
+   from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+
+   train_feats, train_labels, test_feats, test_labels = DBhandler()()
+   ```
+
+### Generic Dataset Handler
+In general this application works with codes and labels numpy arrays with the shape `(features, samples)`. Yes, the samples are in the columns!. Thus, codes of 300 features and 1000 samples must have the shape `(300, 1000)`; in the same way, if we are working only with two labels, then the shape of the labels must be `(2, 1000)`. In this regard, the label array is matrix full of zeros, where `label[i,j]=1` only where the sample 'j' belongs to the label 'i'. For instance, if the first 3 samples belong to label 0 and the next 2 belong to label 1, then `label[:,:5]` will look like this:
+
+<img src="doc_images/label_matrix.png" width="50%"/>
+
+The dataset files must be JSON files containing a serialized dictionary with two keys: `codes` and `labels`.
+
+Before applying JSON serialization the codes and labels must be like this:
 
 ``` python
-from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
-
-train_feats, train_labels, test_feats, test_labels = DBhandler()()
+'codes': [[values_row_1], [values_row_2], [values_row_3], ...]
+'labels': [[values_row_1], [values_row_2], [values_row_3], ...]
 ```
 
+The easiest way of achieving this using numpy arrays is:
+
+``` python
+formatted_data = {
+	'codes': [[mycodes[i].tolist() for i in range(mycodes.shape[0])]],
+	'labels: [[mylabels[i].tolist() for i in range(mylabels.shape[0])]]
+}
+```
+
+**Using the generic dataset handler is simple:**
+
+
+1. Place your dataset in the training directory (create it if it doesn't exist).
+
+2. Fill the Generic Dataset Handler section from your `setting.py`.
+
+3. Update the values of `CLASS_NUMBER` and `DATASET_NAME` in your `settings.py` based on your dataset. E.g.: PatchCamelion is a binary classification problem, so:
+
+	``` python
+	CLASS_NUMBER = 2
+	DATASET_NAME = 'patchcamelyon'
+	```
+
+3. Call the handler. If it works then you are ready to use ILC-KSVD.
+
+   ``` python
+   from utils.datasets.generic import DBhandler
+
+   train_feats, train_labels, test_feats, test_labels = DBhandler()()
+   ```
+
 ## ILC-KSVD
+
+Once you have your dataset handler configured and working; the initialization, training and testing  of ILC-KSVD is straightforward:
 
 ``` python
 from models.ilc_ksvd import ILCksvd
 from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+# from utils.datasets.generic import DBhandler
 
 ilc_ksvd = ILCksvd(DBhandler)
 ilc_ksvd.train()
