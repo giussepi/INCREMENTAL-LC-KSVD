@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" utils/datasets/patchcamelyon """
+""" utils/datasets/generic """
 
 import json
 
@@ -10,7 +10,7 @@ import settings
 
 class DBhandler:
     """
-    Handler for PathCamelyon dataset
+    Generic dataset handler
 
     Usage:
         train_feats, train_labels, test_feats, test_labels = DBhandler()()

@@ -26,14 +26,12 @@ FULL_DATASET_PATH = os.path.join(
 # Generic Dataset Handler ####################################################
 TRAINING_DATA_DIRECTORY_DATASET_PATH = os.path.join(
     DATASETS_DIRECTORY,
-    # 'patchcamelyon',
-    'generated_spf_caltech101',
+    'patchcamelyon',
     'spatial_pyramid_feats_train.json'
 )
 TESTING_DATA_DIRECTORY_DATASET_PATH = os.path.join(
     DATASETS_DIRECTORY,
-    # 'patchcamelyon',
-    'generated_spf_caltech101',
+    'patchcamelyon',
     'spatial_pyramid_feats_test.json'
 )
 
