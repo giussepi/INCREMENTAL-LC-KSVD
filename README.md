@@ -87,7 +87,7 @@ The results on Caltech101 using 30 training samples are consistent with those re
 
 4. If using MKL and EMACS + ELPY, you have to run your code in the old fashion way (C-u C-c C-c will not work)
 
-	``` python
+	``` bash
 	python main.py
 	```
 
