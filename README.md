@@ -85,11 +85,13 @@ The results on Caltech101 using 30 training samples are consistent with those re
 	```
 3. All the code must be called from the `main.py` file.
 
-4. If using MKL and EMACS + ELPY, you have to run your code in the old fashion way (`C-u C-c C-c` will not work, I couldn't get `source /opt/intel/parallel_studio_xe_2020/psxevars.sh` working properly when executing the code with ELPY)
+4. If using MKL and EMACS + ELPY, you have to run your code in the old fashion way (*you must run* `source /opt/intel/parallel_studio_xe_2020/psxevars.sh` in your shell before making the python call):
 
 	``` bash
 	python main.py
 	```
+
+   **Note**: `C-u C-c C-c` will not work, I couldn't get `source /opt/intel/parallel_studio_xe_2020/psxevars.sh` working properly when executing the code with ELPY
 
 ## Dataset handlers
 
