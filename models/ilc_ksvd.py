@@ -297,7 +297,7 @@ class ILCksvd:
         _, _ = self.online_dictionary_learning(Dinit, Tinit, Winit, settings.PARS,
                                                self.train_feats, self.train_labels, Q_train)
         toc = time.time()
-        print('nIncremental dictionary learning completed! it took {} seconds'.format(toc-tic))
+        print('Incremental dictionary learning completed! it took {} seconds'.format(toc-tic))
 
     def classification(self, D, W):
         """
