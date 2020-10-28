@@ -76,14 +76,13 @@ class DBhandler:
         # train_labels (102, 3060)
 
         # getting the subsets of training data and testing data
-        # it is related to the variable 'personnumber'
         labelvector_train, _ = train_labels.nonzero()  # 3060
         labelvector_test, _ = test_labels.nonzero()  # 6084
         trainsampleid = np.nonzero(labelvector_train <= settings.CLASS_NUMBER)[0]  # 3060
         testsampleid = np.nonzero(labelvector_test <= settings.CLASS_NUMBER)[0]  # 6084
         train_subset_feats = train_feats[:, trainsampleid]  # 3000, 3060
         test_subset_feats = test_feats[:, testsampleid]  # 3000, 6084
-        train_subset_labels = train_labels[: settings.CLASS_NUMBER+1, trainsampleid]  # 102, 3060
-        test_subset_labels = test_labels[: settings.CLASS_NUMBER+1, testsampleid]  # 102, 6084
+        train_subset_labels = train_labels[: settings.CLASS_NUMBER, trainsampleid]  # 102, 3060
+        test_subset_labels = test_labels[: settings.CLASS_NUMBER, testsampleid]  # 102, 6084
 
         return train_subset_feats, train_subset_labels, test_subset_feats, test_subset_labels
