@@ -93,9 +93,19 @@ The results on Caltech101 using 30 training samples are consistent with those re
 
    **Note**: `C-u C-c C-c` will not work, I couldn't get `source /opt/intel/parallel_studio_xe_2020/psxevars.sh` working properly when executing the code with ELPY
 
+5. Some tests have been implemented (still more must be done). So if you develop or tweaks some feature do not forget to update or create tests. Running the test is simple as:
+
+	``` bash
+	./run_tests.sh
+	```
+
+	**Note**: Just make sure the script is executable `chmod +x run_tests.sh`
+
 ## Dataset handlers
 
 Classes implemented to manage datasets and provide the training and testing data.
+
+You can apply several types of normalization. See the implemented methods at `utils/utils.py -> Normalizer class`
 
 ### spatialpyramidfeatures4caltech101
 
@@ -123,7 +133,7 @@ Classes implemented to manage datasets and provide the training and testing data
    ``` python
    from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
 
-   train_feats, train_labels, test_feats, test_labels = DBhandler()()
+   train_feats, train_labels, test_feats, test_labels = DBhandler(normalizer=Normalizer.NONE)()
    ```
 
 ### Generic Dataset Handler
@@ -168,7 +178,7 @@ formatted_data = {
    ``` python
    from utils.datasets.generic import DBhandler
 
-   train_feats, train_labels, test_feats, test_labels = DBhandler()()
+   train_feats, train_labels, test_feats, test_labels = DBhandler(normalizer=Normalizer.NONE)()
    ```
 
 ## ILC-KSVD
@@ -180,10 +190,13 @@ from models.ilc_ksvd import ILCksvd
 from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
 # from utils.datasets.generic import DBhandler
 
-ilc_ksvd = ILCksvd(DBhandler)
+ilc_ksvd = ILCksvd(DBhandler, Normalizer.NONE)
 ilc_ksvd.train()
 ilc_ksvd.test(plot=True)
 ```
+
+**Note**: You can apply several types of normalization. See the implemented methods at `utils/utils.py -> Normalizer class`
+
 Achieving the same results reported in the original paper [Label Consistent
 K-SVD: Learning a Discriminative Dictionary for
 Recognition](https://ieeexplore.ieee.org/abstract/document/6516503) using
@@ -191,3 +204,8 @@ spams + MKL required training the algorithm and then using another python execut
 to test it. We assume that this particular behaviour is related with spams and
 MKL; because the results, after running the algorithm several times during the
 day, are not as good as those obtained after restarting the computer.
+
+
+# TODO
+
+- [ ] Write more tests

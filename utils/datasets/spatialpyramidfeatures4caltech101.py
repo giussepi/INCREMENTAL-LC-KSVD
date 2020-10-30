@@ -6,17 +6,25 @@ from scipy.io import loadmat
 
 import settings
 
+from utils.utils import Normalizer
+
 
 class DBhandler:
     """
     Handler for SpatialPyramidFeatures4Caltech101 dataset
 
     Usage:
-        train_feats, train_labels, test_feats, test_labels = DBhandler()()
+        train_feats, train_labels, test_feats, test_labels = DBhandler(Normalizer.NONE)()
     """
 
-    def __init__(self):
-        """ Loads the data """
+    def __init__(self, normalizer=Normalizer.NONE):
+        """
+        Loads spatial pyramids features from caltech101 from .mat file
+
+        Args:
+            normalizer (Normalizer option): Normalization to apply
+        """
+        self.normalizer = normalizer
         self.data = loadmat(settings.FULL_DATASET_PATH)
         # data['filenameMat'].shape (1, 102)
         # data['featureMat'].shape (3000, 9144)
@@ -26,8 +34,7 @@ class DBhandler:
         """ functor call """
         return self.__get_training_testing_subsets()
 
-    @staticmethod
-    def __get_training_testing_sets(feat_matrix, label_matrix, num_per_class):
+    def __get_training_testing_sets(self, feat_matrix, label_matrix, num_per_class):
         """
         Obtain training and testing features by random sampling
 
@@ -62,6 +69,16 @@ class DBhandler:
             test_labels = np.c_[test_labels, label_matrix[:, testids]]
             train_feats = np.c_[train_feats, feat_matrix[:, trainids]]
             train_labels = np.c_[train_labels, label_matrix[:, trainids]]
+
+        if self.normalizer in Normalizer.CHOICES[:4]:
+            # sample normalization
+            train_feats = Normalizer()(self.normalizer, data=train_feats.T).T
+            test_feats = Normalizer()(self.normalizer, data=test_feats.T).T
+        else:
+            # feature scaling
+            scaler, train_feats = Normalizer()(self.normalizer, data=train_feats.T)
+            train_feats = train_feats.T
+            test_feats = Normalizer()(self.normalizer, data=test_feats.T, fitted_scaler=scaler)[1].T
 
         return train_feats, train_labels, test_feats, test_labels
 

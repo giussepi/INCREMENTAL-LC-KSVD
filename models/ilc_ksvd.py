@@ -10,7 +10,9 @@ from matplotlib import pyplot as plt
 from spams import trainDL, lasso, omp
 
 import settings
+from utils.datasets.exceptions import DatasetZeroElementFound
 from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+from utils.utils import Normalizer
 
 
 class ILCksvd:
@@ -18,23 +20,23 @@ class ILCksvd:
     Implements incremental LC-LSVD
 
     Usage:
-        ilc_ksvd = ILCksvd(DBhandler)
+        ilc_ksvd = ILCksvd(DBhandler, Normalizer.NONE)
         ilc_ksvd.train()
         ilc_ksvd.test(plot=True)
     """
 
-    def __init__(self, db_handler_class=DBhandler):
+    def __init__(self, db_handler_class=DBhandler, normalizer=Normalizer.NONE):
         """
         Gets the training and testing datasets
 
         Args:
-            db_handler_class (type): Dataset handler class
-
+            db_handler_class        (type): Dataset handler class
+            normalizer (Normalizer option): Normalization to apply
         """
         assert isinstance(db_handler_class, type)
 
         self.train_feats, self.train_labels, self.test_feats, self.test_labels = \
-            db_handler_class()()
+            db_handler_class(normalizer)()
 
     def parameter_initialization(self):
         """
@@ -68,6 +70,10 @@ class ILCksvd:
             col_ids = np.array(np.nonzero(self.train_labels[classid, :] == 1)).ravel()
             # ensure no zero data elements are chosen
             data_ids = np.array(np.nonzero(np.sum(self.train_feats[:, col_ids]**2, axis=0) > 1e-6)).ravel()
+
+            # Raising an error if any zero lement is found
+            if col_ids.shape[0] != data_ids.shape[0]:
+                raise DatasetZeroElementFound
 
             # Initilization for LC-KSVD (perform KSVD in each class)
             Dpart = self.train_feats[:, col_ids[np.random.choice(data_ids, numPerClass, replace=False)]]
