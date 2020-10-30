@@ -43,9 +43,16 @@ The results on Caltech101 using 30 training samples are consistent with those re
     releases](https://sourceforge.net/projects/math-atlas/files/Stable/) and
     [LaPack releses](http://www.netlib.org/lapack/) to update the script if
     necessary.
-		2. Install spams
 
-			`pip installs spams`
+		2. Install spams [link](https://pypi.org/project/spams/)
+			``` bash
+			# Running this line could get rid of an error when building the wheel for spams
+			sudo apt install git python3-dev python3-virtualenv python3-tk gcc g++ libeigen3-dev r-base libicu-dev libgmp-dev libmpfr-dev mpi-default-bin mpi-default-dev libcgal-dev gmsh libfreetype6-dev libxml2-dev libxslt-dev
+
+			sudo apt-get -y install libblas-dev liblapack-dev gfortran
+
+			pip install spams
+			```
 
 	2. Intel Math Kernel Library (MKL)
 
@@ -70,6 +77,8 @@ The results on Caltech101 using 30 training samples are consistent with those re
 
 
 ## Development
+
+When using Atlas things works smoothly; however, MKL works so much faster!. So the following notes are focused on the case when using the MKL.
 
 1. For some unknown reason numpy must be imported always before spams to avoid
    the importation error `_spams_wrap.cpython-36m-x86_64-linux-gnu.so: undefined symbol: slasrt_`
