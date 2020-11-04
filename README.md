@@ -130,7 +130,7 @@ When using Atlas things works smoothly; however, MKL works so much faster!. So t
 
 Classes implemented to manage datasets and provide the training and testing data.
 
-You can apply several types of normalization. See the implemented methods at `utils/utils.py -> Normalizer class`
+You can apply several types of normalization. See the implemented methods at `ilcksvd/utils/utils.py -> Normalizer class`
 
 ### spatialpyramidfeatures4caltech101
 
@@ -156,7 +156,7 @@ You can apply several types of normalization. See the implemented methods at `ut
 
 4. Call the handler. If it works then you are ready to use ILC-KSVD.
    ``` python
-   from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+   from ilcksvd.utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
 
    train_feats, train_labels, test_feats, test_labels = DBhandler(normalizer=Normalizer.NONE)()
    ```
@@ -201,7 +201,7 @@ formatted_data = {
 3. Call the handler. If it works then you are ready to use ILC-KSVD.
 
    ``` python
-   from utils.datasets.generic import DBhandler
+   from ilcksvd.utils.datasets.generic import DBhandler
 
    train_feats, train_labels, test_feats, test_labels = DBhandler(normalizer=Normalizer.NONE)()
    ```
@@ -211,16 +211,16 @@ formatted_data = {
 Once you have your dataset handler configured and working; the initialization, training and testing  of ILC-KSVD is straightforward:
 
 ``` python
-from models.ilc_ksvd import ILCksvd
-from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
-# from utils.datasets.generic import DBhandler
+from ilcksvd.models.ilc_ksvd import ILCksvd
+from ilcksvd.utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+# from ilcksvd.utils.datasets.generic import DBhandler
 
 ilc_ksvd = ILCksvd(DBhandler, Normalizer.NONE)
 ilc_ksvd.train()
 ilc_ksvd.test(plot=True)
 ```
 
-**Note**: You can apply several types of normalization. See the implemented methods at `utils/utils.py -> Normalizer class`
+**Note**: You can apply several types of normalization. See the implemented methods at `ilcksvd/utils/utils.py -> Normalizer class`
 
 Achieving the same results reported in the original paper [Label Consistent
 K-SVD: Learning a Discriminative Dictionary for
