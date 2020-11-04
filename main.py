@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """ main """
 
-from models.ilc_ksvd import ILCksvd
-# from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
-from utils.datasets.generic import DBhandler
+from ilcksvd.models.ilc_ksvd import ILCksvd
+from ilcksvd.utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+# from ilcksvd.utils.datasets.generic import DBhandler
+from ilcksvd.utils.utils import Normalizer
 
 
 def main():
@@ -14,8 +15,8 @@ def main():
     # print(test_feats.shape)
     # print(test_labels.shape)
 
-    ilc_ksvd = ILCksvd(DBhandler)
-    ilc_ksvd.train()
+    ilc_ksvd = ILCksvd(DBhandler, Normalizer.NONE)
+    # ilc_ksvd.train()
     ilc_ksvd.test(plot=False)
 
 

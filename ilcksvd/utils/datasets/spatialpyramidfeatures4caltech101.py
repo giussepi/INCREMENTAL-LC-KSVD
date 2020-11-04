@@ -6,7 +6,7 @@ from scipy.io import loadmat
 
 import settings
 
-from utils.utils import Normalizer
+from ilcksvd.utils.utils import Normalizer
 
 
 class DBhandler:

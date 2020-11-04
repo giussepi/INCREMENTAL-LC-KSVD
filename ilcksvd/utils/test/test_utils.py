@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 from sklearn.preprocessing import normalize, StandardScaler, MinMaxScaler
 
-from utils.utils import Normalizer
+from ilcksvd.utils.utils import Normalizer
 
 
 class Test_Normalizer(unittest.TestCase):

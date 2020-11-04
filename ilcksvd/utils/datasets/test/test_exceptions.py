@@ -3,7 +3,7 @@
 
 import unittest
 
-from utils.datasets.exceptions import DatasetZeroElementFound
+from ilcksvd.utils.datasets.exceptions import DatasetZeroElementFound
 
 
 class TestDatasetZeroElementFound(unittest.TestCase):

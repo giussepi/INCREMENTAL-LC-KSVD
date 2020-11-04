@@ -6,8 +6,8 @@ import json
 import numpy as np
 
 import settings
-from utils.datasets.exceptions import DatasetZeroElementFound
-from utils.utils import Normalizer
+from ilcksvd.utils.datasets.exceptions import DatasetZeroElementFound
+from ilcksvd.utils.utils import Normalizer
 
 
 class DBhandler:

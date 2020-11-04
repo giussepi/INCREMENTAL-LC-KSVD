@@ -10,9 +10,9 @@ from matplotlib import pyplot as plt
 from spams import trainDL, lasso, omp
 
 import settings
-from utils.datasets.exceptions import DatasetZeroElementFound
-from utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
-from utils.utils import Normalizer
+from ilcksvd.utils.datasets.exceptions import DatasetZeroElementFound
+from ilcksvd.utils.datasets.spatialpyramidfeatures4caltech101 import DBhandler
+from ilcksvd.utils.utils import Normalizer
 
 
 class ILCksvd:
