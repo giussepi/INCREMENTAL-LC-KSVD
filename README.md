@@ -76,21 +76,28 @@ The results on Caltech101 using 30 training samples are consistent with those re
 			`pip install spams-mkl`
 
 ### Install as a package
-You can install this application as a package by running
+You can install this application as a package by running:
 
 ``` bash
-pip install git+git://github.com/giussepi/INCREMENTAL-LC-KSVD.git
+pip install git+git://github.com/giussepi/INCREMENTAL-LC-KSVD.git --use-feature=2020-resolver --no-cache-dir
+
+# or
+
+pip install https://github.com/giussepi/INCREMENTAL-LC-KSVD/tarball/master --use-feature=2020-resolver --no-cache-dir
 
 # or if this repo is still private
-pip install git+ssh://git@github.com/giussepi/INCREMENTAL-LC-KSVD.git
+pip install git+ssh://git@github.com/giussepi/INCREMENTAL-LC-KSVD.git --use-feature=2020-resolver --no-cache-dir
 ```
+
+or adding the following line to your `requirements.txt`:
+
+`ilcksvd @ https://github.com/giussepi/INCREMENTAL-LC-KSVD/tarball/master`
 
 However, the following error will be raised when importing `from ilcksvd.models.ilc_ksvd import ILCksvd`.
 
 `<your_path>/lib/python3.6/site-packages/_spams_wrap.cpython-36m-x86_64-linux-gnu.so: undefined symbol: slasrt_`.
 
-**Thus, only install it as a package if you want to reuse other modules**
-
+**Thus, only install it as a package if you want to reuse some modules**
 
 ## Development
 

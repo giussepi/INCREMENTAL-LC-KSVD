@@ -17,7 +17,7 @@ def _parse_requirements(filename: str) -> List[str]:
 
 
 setuptools.setup(
-    name="ilcksvd-pkg-giussepi",  # Replace with your own username
+    name="ilcksvd",
     version="0.0.1",
     author="Giussepi Lopez",
     author_email="giussepexy@gmail.com",
